@@ -104,8 +104,7 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 		}
 		else {
 			if (!javaLibPath.contains("sigar")) {
-				String delimiter = DefaultScriptExecutor.getOs().is(OsType.Windows) ? ";" : ":";
-				System.setProperty("java.library.path", javaLibPath + delimiter + sigarLibPath);
+				System.setProperty("java.library.path", javaLibPath + ";" + sigarLibPath);
 			}
 		}
 
@@ -369,7 +368,7 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 		MemoryInfo memoryInfo = new MemoryInfo();
 		Mem mem = getInstance().sigar.getMem();
 		Swap swap = getInstance().sigar.getSwap();
-		memoryInfo.setMemTotal(mem.getTotal() / 1024); // KB
+		memoryInfo.setMemTotal(mem.getTotal() / 1024); // MB
 		memoryInfo.setMemUsed(mem.getUsed() / 1024);
 		memoryInfo.setMemFree(mem.getFree() / 1024);
 		memoryInfo.setActualUsed(mem.getActualUsed() / 1024);
