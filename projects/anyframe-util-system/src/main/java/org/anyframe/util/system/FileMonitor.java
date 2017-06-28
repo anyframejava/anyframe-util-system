@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.util.Map;
 
 import org.anyframe.util.DateUtil;
 import org.anyframe.util.system.sigar.SigarAccessor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.sigar.FileInfo;
 import org.hyperic.sigar.FileWatcher;
 import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.SigarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -44,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
  * stop at every five seconds of monitoring. added/modified/deleted contents of
  * file are logged in prefix(NEW/MOD/DEL) or file name, and the modified size is
  * shown in before|after format.
- *
+ * 
  * <pre>
  * 2011-01-19 10:13:01,625  INFO [org.anyframe.util.system.FileMonitor] FileWatcherThread started.
  * 2011-01-19 10:13:06,718  INFO [org.anyframe.util.system.FileMonitor] NEW$D:\workspace_neis_helios\local.common-component.system\test\default2.txt${Mtime: 1월 19 10:13}{Size: 52}
@@ -56,18 +56,19 @@ import org.springframework.util.ReflectionUtils;
  * 2011-01-19 10:13:16,843  INFO [org.anyframe.util.system.FileMonitor] MOD$D:\workspace_neis_helios\local.common-component.system\test\default4.txt${Mtime: 1월 19 10:13|1월 19 10:13}{Size: 16|24}
  * 2011-01-19 10:13:16,859  INFO [org.anyframe.util.system.FileMonitor] DEL$D:\workspace_neis_helios\local.common-component.system\test\default3.txt
  * 2011-01-19 10:13:21,625  INFO [org.anyframe.util.system.FileMonitor] FileWatcherThread stopped.
- *
+ * 
  * </pre>
- *
+ * 
  * @author ByungHun Woo
- *
+ * 
  */
 public abstract class FileMonitor extends SystemUtilBase {
 
 	/**
 	 * default FileMonitor Logger
 	 */
-	private static final Log log = LogFactory.getLog(FileMonitor.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(FileMonitor.class);
 
 	private static boolean running = false;
 
@@ -76,9 +77,9 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * Singleton monitoring thread. monitor target directory using
 	 * FileWatcherThread of Sigar. set as monitoring-target default FileMonitor
 	 * Logger and FileWatcherThread default interval.
-	 *
-	 * @param targetDir
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @return true if the FileWatcherThread is started successfully, false if not
 	 * @see org.hyperic.sigar.FileWatcherThread
 	 */
 	public static boolean startSingleton(String targetDir) {
@@ -88,12 +89,14 @@ public abstract class FileMonitor extends SystemUtilBase {
 	/**
 	 * start directory monitoring. In this case, use Singleton monitoring thread
 	 * by setting monitoring interval.
-	 * @param targetDir
-	 * @param interval - millisecond (ex. 300000 = 300 millisecond)
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param interval
+	 *            - millisecond (ex. 300000 = 300 millisecond)
+	 * @return true if the FileWatcherThread is started successfully, false if not
 	 */
 	public static boolean startSingleton(String targetDir, long interval) {
-		return startSingleton(log, targetDir, interval);
+		return startSingleton(logger, targetDir, interval);
 	}
 
 	/**
@@ -101,7 +104,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * Logger and monitoring interval. The following is an example of setting
 	 * log file(dailyRollingFile) and user-defied Logger name.
 	 * <p>
-	 *
+	 * 
 	 * <pre>
 	 * 		<appender name="fileMonitor"
 	 * 			class="org.apache.log4j.DailyRollingFileAppender">
@@ -120,25 +123,28 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 *         	<appender-ref ref="fileMonitor"/>
 	 *     	</logger>
 	 * </pre>
-	 * @param log
-	 * @param targetDir
+	 * 
+	 * @param log logger
+	 * @param targetDir target directory
 	 * @param interval
-	 * @return
+	 *            - millisecond (ex. 300000 = 300 millisecond)
+	 * @return true if the FileWatcherThread is started successfully, false if not
 	 */
-	public static boolean startSingleton(Log log, String targetDir, long interval) {
+	public static boolean startSingleton(Logger logger, String targetDir,
+			long interval) {
 		if (isRunning()) {
-			log.error("Singleton FileWatcherThread already running!");
+			logger.error("Singleton FileWatcherThread already running!");
 			return false;
 		}
 
 		forceReviveSingletonFileWatcherThread();
 
 		synchronized (targetDir) {
-			if (start(log, FileWatcherThread.getInstance(), targetDir, interval)) {
+			if (start(logger, FileWatcherThread.getInstance(), targetDir,
+					interval)) {
 				setRunning(true);
 				return true;
-			}
-			else {
+			} else {
 				return false;
 			}
 		}
@@ -152,15 +158,18 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * handle them through the FileWatcherThread at the end. Note that for more
 	 * clear analysis of multiple directory monitoring function, set Logger (log
 	 * file) and monitoring interval separately.
-	 * @param log
-	 * @param targetDir
+	 * 
+	 * @param log logger
+	 * @param targetDir target directory
 	 * @param interval
-	 * @return
+	 *            - millisecond (ex. 300000 = 300 millisecond)
+	 * @return true if the FileWatcherThread is started successfully, false if not
 	 */
-	public static FileWatcherThread start(Log log, String targetDir, long interval) {
+	public static FileWatcherThread start(Logger logger, String targetDir,
+			long interval) {
 		FileWatcherThread watcherThread = new FileWatcherThread();
 
-		start(log, watcherThread, targetDir, interval);
+		start(logger, watcherThread, targetDir, interval);
 
 		return watcherThread;
 	}
@@ -169,15 +178,18 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * Start directory monitoring. get Logger and monitoring thread and log the
 	 * information on add/modify/delete file in the monitoring target directory.
 	 * FileWatcher of Sigar was extended and implemented.
-	 * @param log
-	 * @param watcherThread
-	 * @param targetDir
+	 * 
+	 * @param log logger
+	 * @param watcherThread FileWatcherThread
+	 * @param targetDir target directory
 	 * @param interval
-	 * @return
+	 *            - millisecond (ex. 300000 = 300 millisecond)
+	 * @return true if the FileWatcherThread is started successfully, false if not
 	 * @see org.hyperic.sigar.FileWatcherThread
 	 * @see org.hyperic.sigar.FileWatcher
 	 */
-	protected static boolean start(final Log log, final FileWatcherThread watcherThread, final String targetDir,
+	protected static boolean start(final Logger logger,
+			final FileWatcherThread watcherThread, final String targetDir,
 			final long interval) {
 
 		return processIO(new IOCallback<Boolean>() {
@@ -190,14 +202,17 @@ public abstract class FileMonitor extends SystemUtilBase {
 			public Boolean doInProcessIO() throws IOException, SigarException {
 				final File targetDirFile = new File(targetDir);
 				if (!targetDirFile.exists() || !targetDirFile.canRead()) {
-					log.error("targetDir does not exists or can't read : " + targetDir);
+					logger.error(
+							"targetDir does not exists or can't read : {}",
+							targetDir);
 					return false;
 				}
 
 				// interval
 				watcherThread.setInterval(interval);
 
-				FileWatcher watcher = new FileWatcher(SigarAccessor.getInstance().getSigar()) {
+				FileWatcher watcher = new FileWatcher(SigarAccessor
+						.getInstance().getSigar()) {
 					// temporary repository to remove deleted file from
 					// monitoring-target repository
 					private List<String> toRemoveList = new ArrayList<String>();
@@ -206,14 +221,15 @@ public abstract class FileMonitor extends SystemUtilBase {
 					 * modified
 					 */
 					public void onChange(FileInfo info) {
-						log.info("MOD$" + info.getName() + "$" + info.diff());
+						logger.info("MOD${}${}", new Object[] { info.getName(),
+								info.diff() });
 					}
 
 					/**
 					 * deleted
 					 */
 					public void onNotFound(FileInfo info) {
-						log.info("DEL$" + info.getName());
+						logger.info("DEL${}", info.getName());
 						// Note that immediate removal can cause
 						// java.util.ConcurrentModificationException
 						// due to simultaneity issue
@@ -223,9 +239,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 					}
 
 					public void onException(FileInfo info, SigarException e) {
-						// log.info("Error checking " + info.getName() + ":");
-						// e.printStackTrace();
-						log.error("Error checking " + info.getName() + ":", e);
+						logger.error("Error checking {}:", info.getName(), e);
 					}
 
 					@Override
@@ -264,13 +278,20 @@ public abstract class FileMonitor extends SystemUtilBase {
 							if (baseFiles.get(file) == null) {
 								baseFiles.put(file, file.lastModified());
 								try {
-									log.info("NEW$" + file.getAbsolutePath() + "${Mtime: "
-											+ DateUtil.date2String(new Date(file.lastModified()), "MMM dd HH:mm")
-											+ "}{Size: " + file.length() + "}");
+									logger.info(
+											"NEW${}${Mtime: {}}{Size: {}}",
+											new Object[] {
+													file.getAbsolutePath(),
+													DateUtil.date2String(
+															new Date(
+																	file.lastModified()),
+															"MMM dd HH:mm"),
+													file.length() });
 									add(file);
-								}
-								catch (Exception e) {
-									log.error("sigar FileWatcher add failed. " + file.getAbsolutePath(), e);
+								} catch (Exception e) {
+									logger.error(
+											"sigar FileWatcher add failed. {}",
+											file.getAbsolutePath(), e);
 								}
 							}
 						}
@@ -295,7 +316,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 					watcher.add(orgFiles);
 				}
 
-				log.info("FileWatcherThread started.");
+				logger.info("FileWatcherThread started.");
 				watcherThread.add(watcher);
 				watcherThread.doStart();
 
@@ -310,30 +331,32 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * stop directory monitoring. use Singleton monitoring thread.
 	 */
 	public static void stopSingleton() {
-		stopSingleton(log);
+		stopSingleton(logger);
 	}
 
 	/**
 	 * stop directory monitoring. set Logger transferred and kept at start and
 	 * use Singleton monitoring thread.
-	 * @param log
+	 * 
+	 * @param log logger
 	 */
-	public static void stopSingleton(Log log) {
+	public static void stopSingleton(Logger log) {
 		FileWatcherThread watcherThread = FileWatcherThread.getInstance();
 		watcherThread.doStop();
 		setRunning(false);
-		log.info("FileWatcherThread stopped.");
+		logger.info("FileWatcherThread stopped.");
 	}
 
 	/**
 	 * stop directory monitoring. Individually executed using separate
 	 * monitoring thread and make sure set thread and Logger used at start.
+	 * 
 	 * @param log
 	 * @param watcherThread
 	 */
-	public static void stop(Log log, FileWatcherThread watcherThread) {
+	public static void stop(Logger logger, FileWatcherThread watcherThread) {
 		watcherThread.doStop();
-		log.info("FileWatcherThread stopped.");
+		logger.info("FileWatcherThread stopped.");
 	}
 
 	private static void setRunning(boolean running) {
@@ -342,7 +365,8 @@ public abstract class FileMonitor extends SystemUtilBase {
 
 	/**
 	 * whether Singleton FileWatcherThread is currently running
-	 * @return
+	 * 
+	 * @return true if Singleton FileWatcherThread is currently running, false if not
 	 */
 	public static boolean isRunning() {
 		return running;
@@ -353,13 +377,14 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * shouldDie attribute is defined true, therefore even then Thread is run
 	 * later, chick logic cannot perform. Even in Singleton, in the case of
 	 * start re-executed after thread was stopped, it is needed to forcefully
-	 * change shouldDie attribute to false. For changing private filed, forcefully
-	 * reset using Reflection function.
+	 * change shouldDie attribute to false. For changing private filed,
+	 * forcefully reset using Reflection function.
 	 */
 	public static void forceReviveSingletonFileWatcherThread() {
 		processIO(new IOCallback<Object>() {
 			public Object doInProcessIO() throws Exception {
-				Field field = ReflectionUtils.findField(FileWatcherThread.class, "shouldDie");
+				Field field = ReflectionUtils.findField(
+						FileWatcherThread.class, "shouldDie");
 				ReflectionUtils.makeAccessible(field);
 				field.setBoolean(FileWatcherThread.getInstance(), false);
 				return null;

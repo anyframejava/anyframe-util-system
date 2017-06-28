@@ -488,8 +488,8 @@
 			<listitem>
 				<para>
 					실제 사용예는 아래와 같다.
-					<programlisting language="java">Log log = LogFactory.getLog("fileMonitor");
-	FileWatcherThread fileWatcherThread = FileMonitor.start(log, targetDir, 5000);</programlisting>
+					<programlisting language="java">Logger logger = LoggerFactory.getLogger("fileMonitor");
+FileWatcherThread fileWatcherThread = FileMonitor.start(log, targetDir, 5000);</programlisting>
 				</para>
 			</listitem>
 			<listitem>

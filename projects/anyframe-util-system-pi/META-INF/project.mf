@@ -3,11 +3,11 @@ anyframe.home=
 
 #=== Project Information ====
 project.name=anyframe-util-system-pi
-project.home=D:\\java\\workspace\\pluginchange\\anyframe-util-system-pi
-project.version=1.0.1
+project.home=/Users/user/workspace/anyframe-util-system-pi
+project.version=1.0.2
 project.type=web
 project.build=maven
-project.template.home=C:\\Documents and Settings\\SDS\\.anyframe\\templates
+project.template.home=/Users/user/.anyframe/templates
 project.template=default
 project.daoframework=
 package.name=org.anyframe.plugin

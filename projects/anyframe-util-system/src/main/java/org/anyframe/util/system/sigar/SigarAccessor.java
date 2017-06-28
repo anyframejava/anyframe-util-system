@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -607,7 +607,7 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 
 		UptimeInfo uptimeInfo = new UptimeInfo();
 		uptimeInfo.setInfoAll(uptimeResult);
-		uptimeInfo.setCurrentTime(DateUtil.getCurrentTime());
+		uptimeInfo.setCurrentTime(DateUtil.getCurrentTimeString());
 		uptimeInfo.setUptimeSeconds(uptime);
 		parseUptimeInfo(uptimeResult, uptimeInfo);
 		sysInfo.setUptimeInfo(uptimeInfo);
@@ -854,8 +854,8 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 
 	/**
 	 * Execute cmd class Ls of Sigar
-	 * @param filePath
-	 * @return
+	 * @param filePath file path
+	 * @return the result of ls
 	 * @throws SigarException
 	 * @throws ShellCommandUsageException
 	 * @throws ShellCommandExecException
@@ -935,9 +935,9 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 	 * Each information is shown on Tab, and lines are separated in mod order
 	 * returned as parameter so that one batch of information is written on one
 	 * line.
-	 * @param info
-	 * @param mod
-	 * @return
+	 * @param info list of information
+	 * @param mod mod order
+	 * @return one batch of information that is written on one line.
 	 */
 	public static String print(List<String> info, int mod) {
 		StringBuilder buf = new StringBuilder();
@@ -978,7 +978,7 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 	 * uptime
 	 * ,ps,pidof,kill,netstat,netinfo,nfsstat,route,version,mps,sysinfo,time
 	 * ,ulimit,who, [service,fversion in case of Windows])
-	 * @param args
+	 * @param args arguments
 	 * @throws ShellCommandUsageException
 	 * @throws ShellCommandExecException
 	 */
@@ -992,7 +992,7 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 	 * formatting on printfItems of SigarCommandBase, additional works, to get
 	 * execution result text when executing Command class provided in Sigar, and
 	 * print as output
-	 * @param target
+	 * @param target the SigarCommandBase class
 	 */
 	private static void forceFlushPrintfItems(SigarCommandBase target) {
 		ReflectionUtils.invokeMethod(flushPrintfItems, target);
@@ -1002,7 +1002,8 @@ public class SigarAccessor extends org.hyperic.sigar.cmd.SysInfo {
 	 * Enforce the execution of access output member of SigarCommandBase,
 	 * additional work to get execution result text when executing Command class
 	 * provided by Sigar
-	 * @param target
+	 * @param target the SigarCommandBase class
+	 * @return list of execution result
 	 */
 	@SuppressWarnings("unchecked")
 	private static List<String> forceGetOutput(SigarCommandBase target) {

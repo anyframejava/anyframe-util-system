@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,9 +97,9 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * template method for shell script
 	 * @param <T>
-	 * @param commandArr
-	 * @param action
-	 * @return
+	 * @param commandArr array of commands
+	 * @param action shell script callback class
+	 * @return the console output result
 	 */
 	public final static <T> T processShell(String[] commandArr, ShellScriptCallback<T> action) {
 		InputStream inputStream = null;
@@ -173,8 +173,8 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * return the basic console output result executing shell script in
 	 * List<String> format.
-	 * @param commandArr
-	 * @return
+	 * @param commandArr array of commands
+	 * @return the basic console output result
 	 */
 	protected static List<String> getDirectResult(String[] commandArr) {
 		final List<String> result = new ArrayList<String>();
@@ -192,7 +192,7 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 
 	/**
 	 * current system OS (enum type)
-	 * @return
+	 * @return type of os
 	 */
 	public static OsType getOs() {
 		return os;
@@ -204,7 +204,7 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 
 	/**
 	 * set Properties which loaded scripts.propertis files.
-	 * @param scripts
+	 * @param scripts scripts
 	 */
 	public static void setScripts(Properties scripts) {
 		DefaultScriptExecutor.scripts = scripts;
@@ -217,8 +217,8 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * get shell script execution command which is divided into key and value in
 	 * scripts.properties.
-	 * @param key
-	 * @return
+	 * @param key the key of property
+	 * @return shell script execution command
 	 */
 	public static String getProperty(String key) {
 		if (scripts.containsKey(key)) {
@@ -234,9 +234,9 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	 * by getting shell script execution command and regular expression
 	 * (searching first back reference group)
 	 *
-	 * @param commandArr
-	 * @param patternStr
-	 * @return
+	 * @param commandArr array of commands
+	 * @param patternStr regular expression pattern
+	 * @return the console output result
 	 */
 	protected String processShellFirstMatcher(String[] commandArr, final String patternStr) {
 		return processShell(commandArr, new ShellScriptCallback<String>() {
@@ -261,8 +261,8 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	 * line, awk combination, etc. on execution command exactly)script execution
 	 * and result handling.
 	 *
-	 * @param commandArr
-	 * @return
+	 * @param commandArr array of commands
+	 * @return the console output result
 	 */
 	protected String processShellExactResult(String[] commandArr) {
 		return processShell(commandArr, new ShellScriptCallback<String>() {
@@ -281,6 +281,8 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * return the execution result of 1s command on targetDir received as a
 	 * parameter.
+	 * @param targetDir target directory
+	 * @return the execution result of ls command
 	 */
 	public List<String> getDirInformation(String targetDir) {
 		String[] commandArr = getProperty("unix.getDirInformation").replaceAll("\\$1", targetDir).split(" ");
@@ -291,6 +293,8 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * return the execution result of du command under targetDir received as a
 	 * parameter.
+	 * @param targetDir target directory
+	 * @return the execution result of du command
 	 */
 	public String getDirSizeStr(String targetDir) {
 
@@ -307,6 +311,7 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * by analyzing the execution result of ifconfig return mac address of the
 	 * current system.
+	 * @return mac address of the current system
 	 */
 	public String getMacAddress() {
 		String[] commandArr = getProperty("unix.getMacAddress").split(" ");
@@ -317,6 +322,7 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 
 	/**
 	 * return the execution result of netstat.
+	 * @return the execution result of netstat.
 	 */
 	public List<String> getPortScan() {
 		String[] commandArr = getProperty("unix.getPortScan").split(" ");
@@ -327,6 +333,8 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * return the current Total/Used/Free memory information according to the
 	 * enum type received as a parameter.
+	 * @param memRegion the region of memory
+	 * @return return the current Total/Used/Free memory information
 	 */
 	public float getMemoryCapacity(MemRegion memRegion) {
 		switch (memRegion) {
@@ -343,7 +351,7 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * by analyzing the execution result of vmstat, return the Total memory
 	 * information.
-	 * @return
+	 * @return the Total memory information.
 	 */
 	public float getMemoryCapacityTotal() {
 		String[] commandArr = getProperty("unix.getMemoryCapacityTotal").split(" ");
@@ -354,7 +362,7 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * by analyzing the execution result of vmstat, return the Used memory
 	 * information.
-	 * @return
+	 * @return the Used memory information.
 	 */
 	public float getMemoryCapacityUsed() {
 		String[] commandArr = getProperty("unix.getMemoryCapacityUsed").split(" ");
@@ -365,7 +373,7 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 	/**
 	 * by analyzing the execution result of vmstat, return the Free memory
 	 * information.
-	 * @return
+	 * @return the Free memory information.
 	 */
 	public float getMemoryCapacityFree() {
 		String[] commandArr = getProperty("unix.getMemoryCapacityFree").split(" ");

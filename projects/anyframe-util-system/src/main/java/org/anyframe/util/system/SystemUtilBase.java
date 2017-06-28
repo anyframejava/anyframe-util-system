@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ public class SystemUtilBase {
 	 * Separate parameter returned as String Array with space (" ") to make form
 	 * it into one String, and return.
 	 *
-	 * @param arr
-	 * @return
+	 * @param arr array of string
+	 * @return concatenated string
 	 */
 	public static String concatStrArray(String[] arr) {
 		StringBuilder sb = new StringBuilder();
@@ -48,8 +48,8 @@ public class SystemUtilBase {
 	/**
 	 * It is template method which executes callback handling function that is IO type.
 	 * @param <T>
-	 * @param action
-	 * @return
+	 * @param action IOCallback<T>
+	 * @return <T>
 	 */
 	public static <T> T processIO(IOCallback<T> action) {
 		try {

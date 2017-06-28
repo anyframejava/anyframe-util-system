@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,39 @@ import org.anyframe.util.system.SystemInfoUtil.MemRegion;
  */
 public interface ScriptExecutor {
 
+	/**
+	 * return the execution result of dir command on targetDir.
+	 * @param targetDir target directory
+	 * @return the execution result of ls command
+	 */
 	public List<String> getDirInformation(String targetDir);
 
+	/**
+	 * return the directory size under targetDir received as a
+	 * parameter.
+	 * @param targetDir target directory
+	 * @return the directory size under targetDir
+	 */
 	public String getDirSizeStr(String targetDir);
 
+	/**
+	 * return mac address of the current system.
+	 * @return mac address of the current system.
+	 */
 	public String getMacAddress();
 
+	/**
+	 * return the execution result of port scanning.
+	 * @return the execution result of port scanning.
+	 */
 	public List<String> getPortScan();
 
+	/**
+	 * return the current Total/Used/Free memory information according to the
+	 * enum type received as a parameter.
+	 * @param memRegion the region of memory
+	 * @return return the current Total/Used/Free memory information.
+	 */
 	public float getMemoryCapacity(MemRegion memRegion);
 
 }

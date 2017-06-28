@@ -13,36 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.anyframe.util.system.sigar;
-
-import java.io.Serializable;
-
 /**
- * This ProcessExeInfo class is a Value Object class for process execution information.
+ * Provides utilities for system, network, file information handling.
  * 
- * @author ByungHun Woo
+ * @since 1.0.0
  */
-public class ProcessExeInfo implements Serializable {
+package org.anyframe.util.system;
 
-	private static final long serialVersionUID = 12323451L;
-
-	private String cwd;
-
-	private String name;
-
-	public String getCwd() {
-		return cwd;
-	}
-
-	public void setCwd(String cwd) {
-		this.cwd = cwd;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-}

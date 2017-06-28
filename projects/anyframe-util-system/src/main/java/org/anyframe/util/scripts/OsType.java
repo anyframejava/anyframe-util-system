@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,8 +109,8 @@ public enum OsType {
 	/**
 	 * return whether the OsType returned as a parameter is consistent with the
 	 * current OsType or is parent of OsType.
-	 * @param other
-	 * @return
+	 * @param other the OsType returned as a parameter
+	 * @return whether the OsType returned as a parameter is consistent with the current OsType or is parent of OsType
 	 */
 	public boolean is(OsType other) {
 		if (other == null) {
@@ -125,14 +125,26 @@ public enum OsType {
 		return false;
 	}
 
+	/**
+	 * Gets children OS types
+	 * @return children OsTypes
+	 */
 	public List<? extends OsType> children() {
 		return Collections.unmodifiableList(children);
 	}
 
+	/**
+	 * Gets all children OS types
+	 * @return children OsTypes
+	 */
 	public List<? extends OsType> allChildren() {
 		return Collections.unmodifiableList(allChildren);
 	}
 
+	/**
+	 * Add a OS type as a child
+	 * @param child the OsType to add
+	 */
 	private void addChild(OsType child) {
 		this.children.add(child);
 
@@ -147,6 +159,10 @@ public enum OsType {
 		}
 	}
 
+	/**
+	 * Checks if the parent OS type supports XWindow system
+	 * @return true if the parent OS type supports XWindow system, false if not or parent is null
+	 */
 	public boolean supportsXWindowSystem() {
 		if (parent == null) {
 			return false;

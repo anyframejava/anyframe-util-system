@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public class LinuxScriptExecutor extends DefaultScriptExecutor {
 
 	/**
 	 * return Total memory information by analyzing Free execution result.
+	 * @return Total memory information.
 	 */
 	public float getMemoryCapacityTotal() {
 		String[] commandArr = getProperty("linux.getMemoryCapacity").split(" ");
@@ -43,6 +44,7 @@ public class LinuxScriptExecutor extends DefaultScriptExecutor {
 	/**
 	 * analyze Free execution result and return the current Used memory
 	 * information.
+	 * @return the current Used memory information.
 	 */
 	public float getMemoryCapacityUsed() {
 		String[] commandArr = getProperty("linux.getMemoryCapacity").split(" ");
@@ -54,6 +56,7 @@ public class LinuxScriptExecutor extends DefaultScriptExecutor {
 	/**
 	 * analyze free execution result and return the current Free memory
 	 * information.
+	 * @return the current Free memory information.
 	 */
 	public float getMemoryCapacityFree() {
 		String[] commandArr = getProperty("linux.getMemoryCapacity").split(" ");

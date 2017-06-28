@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,10 @@ public class WindowsScriptExecutor extends DefaultScriptExecutor {
 	}
 
 	/**
-	 * return the execution result of dir command on targetDir.
+	 * return the execution result of dir command on targetDir received as a
+	 * parameter.
+	 * @param targetDir target directory
+	 * @return the execution result of ls command
 	 */
 	public List<String> getDirInformation(String targetDir) {
 		String[] commandArr = getProperty("windows.getDirInformation").replaceAll("\\$1", targetDir).split(" ");
@@ -43,6 +46,8 @@ public class WindowsScriptExecutor extends DefaultScriptExecutor {
 
 	/**
 	 * by analyzing dir /s command execution result, get the total size under targetDir (Note that is it text!)
+	 * @param targetDir target directory
+	 * @return the total size under targetDir
 	 */
 	public String getDirSizeStr(String targetDir) {
 
@@ -55,9 +60,10 @@ public class WindowsScriptExecutor extends DefaultScriptExecutor {
 		}
 		return "unknown";
 	}
-
+	
 	/**
 	 * by analyzing the execution result of ipconfig /all command, and get mac address.
+	 * @return mac address
 	 */
 	public String getMacAddress() {
 		String[] commandArr = getProperty("windows.getMacAddress").split(" ");
@@ -68,6 +74,7 @@ public class WindowsScriptExecutor extends DefaultScriptExecutor {
 
 	/**
 	 * return the execution result of netstat command.
+	 * @return the execution result of netstat command
 	 */
 	public List<String> getPortScan() {
 		String[] commandArr = getProperty("windows.getPortScan").split(" ");
@@ -77,6 +84,7 @@ public class WindowsScriptExecutor extends DefaultScriptExecutor {
 
 	/**
 	 * by analyzing the execution result of systeminfo command and return the Total memory information.
+	 * @return the Total memory information.
 	 */
 	public float getMemoryCapacityTotal() {
 		String[] commandArr = getProperty("windows.getMemoryCapacity").split(" ");
@@ -98,6 +106,7 @@ public class WindowsScriptExecutor extends DefaultScriptExecutor {
 
 	/**
 	 * Total - Free memory size = return Used memory information.
+	 * @return the Used memory information.
 	 */
 	public float getMemoryCapacityUsed() {
 		return getMemoryCapacityTotal() - getMemoryCapacityFree();
@@ -105,6 +114,10 @@ public class WindowsScriptExecutor extends DefaultScriptExecutor {
 
 	/**
 	 * By analyzing the execution result of systeminfo command, return the current Used memory information.
+	 */
+	/**
+	 * By analyzing the execution result of systeminfo command, return the current Used memory information.
+	 * @return the current Used memory information.
 	 */
 	public float getMemoryCapacityFree() {
 		String[] commandArr = getProperty("windows.getMemoryCapacity").split(" ");

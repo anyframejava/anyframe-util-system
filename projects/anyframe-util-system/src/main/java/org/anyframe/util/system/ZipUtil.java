@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class that provides file or directory compress/decompress function. Supports
@@ -88,7 +88,7 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * ZipUtils Logger
 	 */
-	private static final Log log = LogFactory.getLog(ZipUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
 
 	/**
 	 * Provide interface so that decompress logic according to case can be
@@ -99,29 +99,34 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * 
 	 */
 	public interface DecompressCallBack {
-		public void doInDecompress(File file, File destDir) throws IOException, ArchiveException;
+		public void doInDecompress(File file, File destDir) throws IOException,
+				ArchiveException;
 	}
 
 	/**
 	 * decompress general template - compress file check and destDir check,
 	 * within decompress main logic Includes DecompressCallBack individual logic
 	 * call handling.
-	 * @param action
-	 * @param targetZipFileStr
-	 * @param destDirStr
-	 * @return
+	 * 
+	 * @param action DecompressCallBack
+	 * @param targetZipFileStr target zip file
+	 * @param destDirStr destination directory
+	 * @return true if decompress process is successful, false if not
 	 */
-	protected static boolean processDecompress(final DecompressCallBack action, String targetZipFileStr,
-			String destDirStr) {
+	protected static boolean processDecompress(final DecompressCallBack action,
+			String targetZipFileStr, String destDirStr) {
 		// check zipFile
 		final File file = new File(targetZipFileStr);
 		if (!file.exists() || !file.canRead()) {
-			log.error("could not decompress. " + file.getAbsolutePath() + " does not exists or can not read.");
+			logger.error(
+					"could not decompress. {} does not exists or can not read.",
+					file.getAbsolutePath());
 			return false;
 		}
 
 		// check destDir
-		final File destDir = (destDirStr == null) ? file.getParentFile() : new File(destDirStr);
+		final File destDir = (destDirStr == null) ? file.getParentFile()
+				: new File(destDirStr);
 		if (!destDir.exists()) {
 			destDir.mkdirs();
 		}
@@ -145,31 +150,30 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * extracted in Stream format and created as file in destination path. In
 	 * this case, there is no content when Entry is directory, so the related
 	 * directory is created.
-	 * @param destDir
-	 * @param ais
-	 * @param isDirectory
-	 * @param entryName
+	 * 
+	 * @param destDir destination directory
+	 * @param ais input stream
+	 * @param isDirectory true if entry is directory, false if not
+	 * @param entryName the name of entry
 	 * @throws IOException
 	 */
-	protected static void processEachContent(final File destDir, InputStream ais, boolean isDirectory, String entryName)
+	protected static void processEachContent(final File destDir,
+			InputStream ais, boolean isDirectory, String entryName)
 			throws IOException {
 		File itemFile = new File(destDir, entryName);
 		if (isDirectory) {
 			itemFile.mkdirs();
-		}
-		else {
+		} else {
 			FileOutputStream fos = null;
 			BufferedOutputStream bos = null;
 			try {
 				fos = new FileOutputStream(itemFile);
 				bos = new BufferedOutputStream(fos);
 				IOUtils.copy(ais, bos);
-			}
-			catch (IOException e) {
-				log.error(e);
+			} catch (IOException e) {
+				logger.error("fail to process each content.", e);
 				throw e;
-			}
-			finally {
+			} finally {
 				if (bos != null) {
 					bos.flush();
 				}
@@ -182,8 +186,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Decompress related file with parameter as Zip compressed file path. In
 	 * this case, decompress in the same path as the related compressed file.
-	 * @param targetZipFileStr
-	 * @return
+	 * 
+	 * @param targetZipFileStr target zip file
+	 * @return true if decompress process is successful, false if not
 	 */
 	public static boolean decompressZip(String targetZipFileStr) {
 		return decompressZip(targetZipFileStr, null, null);
@@ -192,28 +197,35 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Decompress Zip file. In this case, decompress in the destination path
 	 * returned as parameter.
-	 * @param targetZipFileStr
-	 * @param destDirStr
-	 * @return
+	 * 
+	 * @param targetZipFileStr target zip file
+	 * @param destDirStr destination directory
+	 * @return true if decompress process is successful, false if not
 	 */
-	public static boolean decompressZip(String targetZipFileStr, String destDirStr) {
+	public static boolean decompressZip(String targetZipFileStr,
+			String destDirStr) {
 		return decompressZip(targetZipFileStr, destDirStr, null);
 	}
 
 	/**
 	 * Decompress Zip file. In this case, return destination path and Encoding
 	 * as parameter, and handle.
+	 * 
 	 * @param targetZipFileStr
-	 * @param destDirStr decompress in the same path as compressed file if
-	 * destination path is null
-	 * @param encoding default encoding of path when encoding is null
-	 * (System.getProperty("file.encoding"))
-	 * @return
+	 * @param destDirStr
+	 *            decompress in the same path as compressed file if destination
+	 *            path is null
+	 * @param encoding
+	 *            default encoding of path when encoding is null
+	 *            (System.getProperty("file.encoding"))
+	 * @return true if decompress process is successful, false if not
 	 * @see org.apache.commons.compress.archivers.zip.ZipFile
 	 */
-	public static boolean decompressZip(String targetZipFileStr, String destDirStr, final String encoding) {
+	public static boolean decompressZip(String targetZipFileStr,
+			String destDirStr, final String encoding) {
 		return processDecompress(new DecompressCallBack() {
-			public void doInDecompress(File file, File destDir) throws IOException {
+			public void doInDecompress(File file, File destDir)
+					throws IOException {
 				// ZipFile case
 				ZipFile zipFile = new ZipFile(file, encoding, true);
 
@@ -224,7 +236,8 @@ public abstract class ZipUtil extends SystemUtilBase {
 				while (entries.hasMoreElements()) {
 					entry = entries.nextElement();
 					InputStream content = zipFile.getInputStream(entry);
-					processEachContent(destDir, content, entry.isDirectory(), entry.getName());
+					processEachContent(destDir, content, entry.isDirectory(),
+							entry.getName());
 					IOUtils.closeQuietly(content);
 				}
 				// zipFile close
@@ -235,14 +248,16 @@ public abstract class ZipUtil extends SystemUtilBase {
 
 	/**
 	 * Decompress Gzip file and return related file.
-	 * @param gzipFile
-	 * @return
+	 * 
+	 * @param gzipFile gzip file
+	 * @return related file
 	 * @throws IOException
 	 */
 	public static File decompressGzip(File gzipFile) throws IOException {
 		FileInputStream fis = new FileInputStream(gzipFile);
 		BufferedInputStream bis = new BufferedInputStream(fis);
-		File archiveFile = new File(GzipUtils.getUncompressedFilename(gzipFile.getAbsolutePath()));
+		File archiveFile = new File(GzipUtils.getUncompressedFilename(gzipFile
+				.getAbsolutePath()));
 		FileOutputStream fos = new FileOutputStream(archiveFile);
 		GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bis);
 
@@ -262,8 +277,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Use ArchiveStreamFactory of Commons Compress to decompress compressed
 	 * file (Zip/Jar/Tar/Ar/Cpio).
-	 * @param targetCompressFileStr
-	 * @return
+	 * 
+	 * @param targetCompressFileStr target compressed file
+	 * @return true if decompress process is successful, false if not
 	 * @see org.apache.commons.compress.archivers.ArchiveStreamFactory
 	 */
 	public static boolean decompressArchive(String targetCompressFileStr) {
@@ -274,14 +290,17 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Use ArchiveStreamFactory of Commons Compress to decompress compressed
 	 * file (Zip/Jar/Tar/Ar/Cpio or tar.gz). In this case, decompress in
 	 * destination path returned as parameter.
-	 * @param targetCompressFileStr
-	 * @param destDirStr
-	 * @return
+	 * 
+	 * @param targetCompressFileStr target compressed file
+	 * @param destDirStr destination directory
+	 * @return true if decompress process is successful, false if not
 	 * @see ArchiveStreamFactory
 	 */
-	public static boolean decompressArchive(String targetCompressFileStr, String destDirStr) {
+	public static boolean decompressArchive(String targetCompressFileStr,
+			String destDirStr) {
 		return processDecompress(new DecompressCallBack() {
-			public void doInDecompress(File file, File destDir) throws IOException, ArchiveException {
+			public void doInDecompress(File file, File destDir)
+					throws IOException, ArchiveException {
 				if (GzipUtils.isCompressedFilename(file.getName())) {
 					file = decompressGzip(file);
 				}
@@ -292,7 +311,8 @@ public abstract class ZipUtil extends SystemUtilBase {
 				ArchiveEntry entry = null;
 
 				while ((entry = ais.getNextEntry()) != null) {
-					processEachContent(destDir, ais, entry.isDirectory(), entry.getName());
+					processEachContent(destDir, ais, entry.isDirectory(),
+							entry.getName());
 				}
 				IOUtils.closeQuietly(ais);
 				IOUtils.closeQuietly(bis);
@@ -304,8 +324,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Use java basic function (java.util.zip) to decompress Zip file. In this
 	 * case, note that filename in compressed file should be UTF-8.
-	 * @param targetZipFileStr
-	 * @return
+	 * 
+	 * @param targetZipFileStr target zip file
+	 * @return true if decompress process is successful, false if not
 	 */
 	public static boolean decompressJavaZip(String targetZipFileStr) {
 		return decompressJavaZip(targetZipFileStr, null);
@@ -315,13 +336,16 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Use java basic function (java.util.zip) to decompress Zip file. In this
 	 * case, decompress in destination path returned as parameter. Note that
 	 * filename in compressed file should be UTF-8.
-	 * @param targetZipFileStr
-	 * @param destDirStr
-	 * @return
+	 * 
+	 * @param targetZipFileStr target zip file
+	 * @param destDirStr destination directory
+	 * @return true if decompress process is successful, false if not
 	 */
-	public static boolean decompressJavaZip(String targetZipFileStr, String destDirStr) {
+	public static boolean decompressJavaZip(String targetZipFileStr,
+			String destDirStr) {
 		return processDecompress(new DecompressCallBack() {
-			public void doInDecompress(File file, File destDir) throws IOException, ArchiveException {
+			public void doInDecompress(File file, File destDir)
+					throws IOException, ArchiveException {
 				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);
 
@@ -329,7 +353,8 @@ public abstract class ZipUtil extends SystemUtilBase {
 				ZipEntry entry = null;
 
 				while ((entry = zis.getNextEntry()) != null) {
-					processEachContent(destDir, zis, entry.isDirectory(), entry.getName());
+					processEachContent(destDir, zis, entry.isDirectory(),
+							entry.getName());
 					zis.closeEntry();
 				}
 				IOUtils.closeQuietly(zis);
@@ -342,32 +367,38 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Provide interface so that logic which needs to be compressed according to
 	 * case is developed as Callback.
+	 * 
 	 * @author woos41
 	 * 
 	 */
 	public interface CompressCallBack {
 		public ArchiveOutputStream createArchiveOutputStream(OutputStream os);
 
-		public ArchiveEntry createArchiveEntry(File targetDirFile, File entryFile);
+		public ArchiveEntry createArchiveEntry(File targetDirFile,
+				File entryFile);
 	}
 
 	/**
 	 * Compress destination directory or compress result Archive path. Create
 	 * dest archive file in appropriate path with suffix as parameter. In this
 	 * case, force creation if parent path does not exist.
-	 * @param targetDirFile
-	 * @param destArchiveStr
-	 * @param archiveSuffix extension (ex. zip, tar, gz..)
-	 * @return
+	 * 
+	 * @param targetDirFile target directory or file
+	 * @param destArchiveStr destination archive
+	 * @param archiveSuffix
+	 *            extension (ex. zip, tar, gz..)
+	 * @return related file
 	 * @throws IOException
 	 */
-	private static File makeDestArchiveFile(File targetDirFile, String destArchiveStr, String archiveSuffix)
-			throws IOException {
+	private static File makeDestArchiveFile(File targetDirFile,
+			String destArchiveStr, String archiveSuffix) throws IOException {
 		// check dest archive file
-		File destArchiveFile = (destArchiveStr == null) ? new File(targetDirFile.getParent(), targetDirFile.getName()
-				+ "." + archiveSuffix) : new File(destArchiveStr);
+		File destArchiveFile = (destArchiveStr == null) ? new File(
+				targetDirFile.getParent(), targetDirFile.getName() + "."
+						+ archiveSuffix) : new File(destArchiveStr);
 		if (!destArchiveFile.exists()) {
-			File parentDir = new File(destArchiveFile.getAbsolutePath()).getParentFile();
+			File parentDir = new File(destArchiveFile.getAbsolutePath())
+					.getParentFile();
 			if (!parentDir.exists()) {
 				FileUtils.forceMkdir(parentDir);
 			}
@@ -380,35 +411,41 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Includes checking directory (file) to be compressed or creating dest
 	 * compress file, and handling individual logic call of CompressCallBack
 	 * within compress main logic.
-	 * @param action
-	 * @param targetDir
-	 * @param archiveSuffix - "zip", "jar", "tar", "ar", "cpio"
-	 * @return
+	 * 
+	 * @param action CompressCallBack
+	 * @param targetDir target directory
+	 * @param archiveSuffix
+	 *            - "zip", "jar", "tar", "ar", "cpio"
+	 * @return true if compress process is successful, false if not
 	 */
-	protected static boolean processCompress(final CompressCallBack action, final String targetDir,
-			final String destArchiveStr, final String archiveSuffix) {
+	protected static boolean processCompress(final CompressCallBack action,
+			final String targetDir, final String destArchiveStr,
+			final String archiveSuffix) {
 		// main logic
 		return processIO(new IOCallback<Boolean>() {
 			public Boolean doInProcessIO() throws IOException, Exception {
 				// check targetDir or targetFile
 				final File targetDirFile = new File(targetDir);
 				if (!targetDirFile.exists() || !targetDirFile.canRead()) {
-					log.error("could not compress. " + targetDirFile.getAbsolutePath()
-							+ " does not exists or can not read.");
+					logger.error(
+							"could not compress. {} does not exists or can not read.",
+							targetDirFile.getAbsolutePath());
 					return false;
 				}
 
-				final File destArchiveFile = makeDestArchiveFile(targetDirFile, destArchiveStr, archiveSuffix);
+				final File destArchiveFile = makeDestArchiveFile(targetDirFile,
+						destArchiveStr, archiveSuffix);
 
 				FileOutputStream fos = new FileOutputStream(destArchiveFile);
 				BufferedOutputStream bos = new BufferedOutputStream(fos);
 
 				Iterator<File> iter = null;
 				if (targetDirFile.isDirectory()) {
-					iter = getNestedFileAndDirListAll(targetDirFile, new ArrayList<File>()).iterator();
-				}
-				else {
-					iter = Arrays.asList(new File[] { targetDirFile }).iterator();
+					iter = getNestedFileAndDirListAll(targetDirFile,
+							new ArrayList<File>()).iterator();
+				} else {
+					iter = Arrays.asList(new File[] { targetDirFile })
+							.iterator();
 				}
 
 				// archive output stream
@@ -417,11 +454,14 @@ public abstract class ZipUtil extends SystemUtilBase {
 				while (iter.hasNext()) {
 					File entryFile = iter.next();
 					if (entryFile.isFile()) {
-						FileInputStream entryFis = new FileInputStream(entryFile);
-						BufferedInputStream entryBis = new BufferedInputStream(entryFis);
+						FileInputStream entryFis = new FileInputStream(
+								entryFile);
+						BufferedInputStream entryBis = new BufferedInputStream(
+								entryFis);
 
 						// archive entry
-						ArchiveEntry entry = action.createArchiveEntry(targetDirFile, entryFile);
+						ArchiveEntry entry = action.createArchiveEntry(
+								targetDirFile, entryFile);
 
 						zos.putArchiveEntry(entry);
 
@@ -430,9 +470,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 						zos.closeArchiveEntry();
 						IOUtils.closeQuietly(entryBis);
 						IOUtils.closeQuietly(entryFis);
-					}
-					else {
-						zos.putArchiveEntry(action.createArchiveEntry(targetDirFile, entryFile));
+					} else {
+						zos.putArchiveEntry(action.createArchiveEntry(
+								targetDirFile, entryFile));
 						zos.closeArchiveEntry();
 					}
 				}
@@ -452,17 +492,18 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Get all files and directories under targetDir recursively, and return in
 	 * List<File> format.
-	 * @param targetDir
-	 * @param files
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param files list of files to search
+	 * @return list of files
 	 */
-	public static List<File> getNestedFileAndDirListAll(File targetDir, List<File> files) {
+	public static List<File> getNestedFileAndDirListAll(File targetDir,
+			List<File> files) {
 		for (File dirOrFile : targetDir.listFiles()) {
 			if (dirOrFile.isDirectory() && dirOrFile.canRead()) {
 				files.add(dirOrFile);
 				getNestedFileAndDirListAll(dirOrFile, files);
-			}
-			else {
+			} else {
 				files.add(dirOrFile);
 			}
 		}
@@ -475,12 +516,14 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * directory. In this case, set so that it ends with "/" when Entry is
 	 * directory. When original path and Entry path are the same, handle as
 	 * single item file, and apply relative path exceptionally.
-	 * @param file
-	 * @param entryFile
-	 * @return
+	 * 
+	 * @param file file
+	 * @param entryFile entry file
+	 * @return destination path
 	 */
 	private static String toRelativePath(File file, File entryFile) {
-		String relativePath = entryFile.getAbsolutePath().substring(file.getAbsolutePath().length());
+		String relativePath = entryFile.getAbsolutePath().substring(
+				file.getAbsolutePath().length());
 		if (relativePath.length() == 0) {
 			relativePath = entryFile.getName();
 		}
@@ -488,14 +531,16 @@ public abstract class ZipUtil extends SystemUtilBase {
 		if (entryFile.isDirectory() && !relativePath.endsWith("/")) {
 			relativePath += "/";
 		}
-		return relativePath.replace(File.separatorChar, '/').replaceFirst("^/", "");
+		return relativePath.replace(File.separatorChar, '/').replaceFirst("^/",
+				"");
 	}
 
 	/**
 	 * Handle Zip compress by getting compress destination path for directory or
 	 * file as parameter.
-	 * @param targetDir
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @return true if compress process is successful, false if not
 	 */
 	public static boolean compressZip(String targetDir) {
 		return compressZip(targetDir, null, null);
@@ -505,10 +550,12 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Handle Zip compress by getting compress destination path for directory or
 	 * file as parameter. In this case, create compressed file in destArchiveStr
 	 * path returned as parameter.
-	 * @param targetDir
-	 * @param destArchiveStr absolute path of compressed file to be created (or
-	 * standard relative path of working directory)
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param destArchiveStr
+	 *            absolute path of compressed file to be created (or standard
+	 *            relative path of working directory)
+	 * @return true if compress process is successful, false if not
 	 */
 	public static boolean compressZip(String targetDir, String destArchiveStr) {
 		return compressZip(targetDir, destArchiveStr, null);
@@ -519,13 +566,16 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * this case, compressed file is created in destArchiveStr path returned as
 	 * parameter, and Entry filename is developed in compressed file applying
 	 * Encoding returned as parameter.
-	 * @param targetDir
-	 * @param destArchiveStr
-	 * @param encoding platform default when null
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param destArchiveStr destination archive
+	 * @param encoding
+	 *            platform default when null
+	 * @return true if compress process is successful, false if not
 	 * @see ZipArchiveOutputStream, ZipArchiveEntry
 	 */
-	public static boolean compressZip(String targetDir, String destArchiveStr, final String encoding) {
+	public static boolean compressZip(String targetDir, String destArchiveStr,
+			final String encoding) {
 		return processCompress(new CompressCallBack() {
 			public ArchiveOutputStream createArchiveOutputStream(OutputStream os) {
 				ZipArchiveOutputStream zos = new ZipArchiveOutputStream(os);
@@ -533,8 +583,10 @@ public abstract class ZipUtil extends SystemUtilBase {
 				return zos;
 			}
 
-			public ArchiveEntry createArchiveEntry(File targetDirFile, File entryFile) {
-				ZipArchiveEntry entry = new ZipArchiveEntry(toRelativePath(targetDirFile, entryFile));
+			public ArchiveEntry createArchiveEntry(File targetDirFile,
+					File entryFile) {
+				ZipArchiveEntry entry = new ZipArchiveEntry(toRelativePath(
+						targetDirFile, entryFile));
 				entry.setSize(entryFile.length());
 				return entry;
 			}
@@ -544,8 +596,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Get compress destination path for directory or file as parameter to
 	 * handle Jar (similar to Zip).
-	 * @param targetDir
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @return true if compress process is successful, false if not
 	 */
 	public static boolean compressJar(String targetDir) {
 		return compressJar(targetDir, null, null);
@@ -555,9 +608,10 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Get compress destination path for directory or file as parameter to
 	 * handle Jar (similar to Zip). In this case, create compressed file in
 	 * destArchiveStr path returned as parameter.
-	 * @param targetDir
-	 * @param destArchiveStr
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param destArchiveStr destination archive
+	 * @return true if compress process is successful, false if not
 	 */
 	public static boolean compressJar(String targetDir, String destArchiveStr) {
 		return compressJar(targetDir, destArchiveStr, null);
@@ -568,13 +622,15 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * handle Jar (similar to Zip). In this case, create compressed file in
 	 * destArchiveStr path returned as parameter, and apply Encoding returned as
 	 * parameter to develop Entry filename in compressed file.
-	 * @param targetDir
-	 * @param destArchiveStr
-	 * @param encoding
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param destArchiveStr destination archive
+	 * @param encoding encoding
+	 * @return true if compress process is successful, false if not
 	 * @see JarArchiveOutputStream, JarArchiveEntry
 	 */
-	public static boolean compressJar(String targetDir, String destArchiveStr, final String encoding) {
+	public static boolean compressJar(String targetDir, String destArchiveStr,
+			final String encoding) {
 		return processCompress(new CompressCallBack() {
 			public ArchiveOutputStream createArchiveOutputStream(OutputStream os) {
 				JarArchiveOutputStream jos = new JarArchiveOutputStream(os);
@@ -582,8 +638,10 @@ public abstract class ZipUtil extends SystemUtilBase {
 				return jos;
 			}
 
-			public ArchiveEntry createArchiveEntry(File targetDirFile, File entryFile) {
-				JarArchiveEntry entry = new JarArchiveEntry(toRelativePath(targetDirFile, entryFile));
+			public ArchiveEntry createArchiveEntry(File targetDirFile,
+					File entryFile) {
+				JarArchiveEntry entry = new JarArchiveEntry(toRelativePath(
+						targetDirFile, entryFile));
 				entry.setSize(entryFile.length());
 				return entry;
 			}
@@ -593,8 +651,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Get compress destination path for directory or file as parameter to
 	 * handle Tar (bind into one file).
-	 * @param targetDir
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @return true if compress process is successful, false if not
 	 */
 	public static boolean compressTar(String targetDir) {
 		return compressTar(targetDir, null);
@@ -604,9 +663,10 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Get compress destination path for directory or file as parameter to
 	 * handle Tar (bind into one file). In this case, create compressed file in
 	 * destArchiveStr path returned as parameter.
-	 * @param targetDir
-	 * @param destArchiveStr
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param destArchiveStr destination archive
+	 * @return true if compress process is successful, false if not
 	 * @see TarArchiveOutputStream, TarArchiveEntry
 	 */
 	public static boolean compressTar(String targetDir, String destArchiveStr) {
@@ -616,8 +676,10 @@ public abstract class ZipUtil extends SystemUtilBase {
 				return tos;
 			}
 
-			public ArchiveEntry createArchiveEntry(File targetDirFile, File entryFile) {
-				TarArchiveEntry entry = new TarArchiveEntry(toRelativePath(targetDirFile, entryFile));
+			public ArchiveEntry createArchiveEntry(File targetDirFile,
+					File entryFile) {
+				TarArchiveEntry entry = new TarArchiveEntry(toRelativePath(
+						targetDirFile, entryFile));
 				entry.setSize(entryFile.length());
 				return entry;
 			}
@@ -627,23 +689,25 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Handle Gzip. Gzip is usually for tar compress file, and related method is
 	 * called internally in compressTarGz method.
-	 * @param targetArchiveOrFile
-	 * @param destArchiveStr
-	 * @return
+	 * 
+	 * @param targetArchiveOrFile target archive of file
+	 * @param destArchiveStr destination archive
+	 * @return related file
 	 * @throws CompressorException
 	 * @throws IOException
 	 */
-	public static File compressGzip(File targetArchiveOrFile, String destArchiveStr) throws CompressorException,
-			IOException {
+	public static File compressGzip(File targetArchiveOrFile,
+			String destArchiveStr) throws CompressorException, IOException {
 
 		FileInputStream fis = new FileInputStream(targetArchiveOrFile);
 		BufferedInputStream bis = new BufferedInputStream(fis);
 
-		File gzipFile = makeDestArchiveFile(targetArchiveOrFile, destArchiveStr, "gz");
+		File gzipFile = makeDestArchiveFile(targetArchiveOrFile,
+				destArchiveStr, "gz");
 		FileOutputStream fos = new FileOutputStream(gzipFile);
 
-		CompressorOutputStream cos = new CompressorStreamFactory().createCompressorOutputStream(
-				CompressorStreamFactory.GZIP, fos);
+		CompressorOutputStream cos = new CompressorStreamFactory()
+				.createCompressorOutputStream(CompressorStreamFactory.GZIP, fos);
 
 		IOUtils.copy(bis, cos);
 
@@ -661,8 +725,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Handle tar.gz by getting compress file path of directory or file as
 	 * parameter.
-	 * @param targetDir
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @return true if compress process is successful, false if not
 	 */
 	public static boolean compressTarGz(String targetDir) {
 		return compressTarGz(targetDir, null);
@@ -676,25 +741,25 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * that tar file is created in the same location as final tar.gz compress
 	 * file.
 	 * 
-	 * @param targetDir
-	 * @param destTarGzStr
-	 * @return
+	 * @param targetDir target directory
+	 * @param destTarGzStr destination tar gz
+	 * @return true if compress process is successful, false if not
 	 */
-	public static boolean compressTarGz(final String targetDir, final String destTarGzStr) {
+	public static boolean compressTarGz(final String targetDir,
+			final String destTarGzStr) {
 		return processIO(new IOCallback<Boolean>() {
 			public Boolean doInProcessIO() throws IOException, Exception {
 				File targetDirFile = new File(targetDir);
 				File targetTarFile = null;
 
 				if (destTarGzStr == null) {
-					targetTarFile = new File(targetDirFile.getAbsoluteFile().getParentFile(), targetDirFile.getName()
+					targetTarFile = new File(targetDirFile.getAbsoluteFile()
+							.getParentFile(), targetDirFile.getName() + ".tar");
+				} else {
+					targetTarFile = new File(new File(destTarGzStr)
+							.getAbsoluteFile().getParentFile()
+							.getAbsolutePath(), targetDirFile.getName()
 							+ ".tar");
-				}
-				else {
-					targetTarFile = new File(
-							new File(destTarGzStr).getAbsoluteFile().getParentFile().getAbsolutePath(), targetDirFile
-									.getName()
-									+ ".tar");
 				}
 
 				if (!compressTar(targetDir, targetTarFile.getAbsolutePath())) {
@@ -712,8 +777,9 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Handle Ar by getting compress destination path for directory or file as
 	 * parameter.
-	 * @param targetDir
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @return true if compress process is successful, false if not
 	 */
 	public static boolean compressAr(String targetDir) {
 		return compressAr(targetDir, null);
@@ -723,9 +789,10 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Handle Ar by getting compress destination path for directory or file as
 	 * parameter. In this case, create compressed file in destArchiveStr path
 	 * returned as parameter. Note that there is a 16 byte limit to filename.
-	 * @param targetDir
-	 * @param destArchiveStr
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param destArchiveStr destination archive
+	 * @return true if compress process is successful, false if not
 	 * @see ArArchiveOutputStream, ArchiveEntry
 	 */
 	public static boolean compressAr(String targetDir, String destArchiveStr) {
@@ -737,9 +804,11 @@ public abstract class ZipUtil extends SystemUtilBase {
 				return aros;
 			}
 
-			public ArchiveEntry createArchiveEntry(File targetDirFile, File entryFile) {
-				return new ArArchiveEntry(toRelativePath(targetDirFile, entryFile),
-						isUnix && entryFile.isDirectory() ? 0 : entryFile.length());
+			public ArchiveEntry createArchiveEntry(File targetDirFile,
+					File entryFile) {
+				return new ArArchiveEntry(toRelativePath(targetDirFile,
+						entryFile), isUnix && entryFile.isDirectory() ? 0
+						: entryFile.length());
 			}
 		}, targetDir, destArchiveStr, "ar");
 	}
@@ -747,6 +816,7 @@ public abstract class ZipUtil extends SystemUtilBase {
 	/**
 	 * Handle Cpio by getting compress destination path for directory or file as
 	 * parameter.
+	 * 
 	 * @param targetDir
 	 * @return
 	 */
@@ -758,9 +828,10 @@ public abstract class ZipUtil extends SystemUtilBase {
 	 * Handle Cpio by getting compress destination path as parameter for
 	 * directory or file. In this case, compress file is created in
 	 * destArchiveStr path returned as parameter.
-	 * @param targetDir
-	 * @param destArchiveStr
-	 * @return
+	 * 
+	 * @param targetDir target directory
+	 * @param destArchiveStr destination archive
+	 * @return true if compress process is successful, false if not
 	 * @see CpioArchiveOutputStream, CpioArchiveEntry
 	 */
 	public static boolean compressCpio(String targetDir, String destArchiveStr) {
@@ -770,12 +841,13 @@ public abstract class ZipUtil extends SystemUtilBase {
 				return cpioos;
 			}
 
-			public ArchiveEntry createArchiveEntry(File targetDirFile, File entryFile) {
-				CpioArchiveEntry entry = new CpioArchiveEntry(toRelativePath(targetDirFile, entryFile));
+			public ArchiveEntry createArchiveEntry(File targetDirFile,
+					File entryFile) {
+				CpioArchiveEntry entry = new CpioArchiveEntry(toRelativePath(
+						targetDirFile, entryFile));
 				if (entryFile.isDirectory()) {
 					entry.setMode(CpioConstants.C_ISDIR);
-				}
-				else {
+				} else {
 					entry.setSize(entryFile.length());
 					entry.setMode(CpioConstants.C_ISREG);
 				}

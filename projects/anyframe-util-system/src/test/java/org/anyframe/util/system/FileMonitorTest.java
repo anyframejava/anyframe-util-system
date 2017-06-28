@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2008-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.SigarException;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TestCase for FileMonitor that provides directory monitoring function. Is
@@ -33,7 +33,7 @@ import org.junit.Test;
  * results.
  * 
  * @author ByungHun Woo
- *
+ * 
  */
 public class FileMonitorTest {
 
@@ -47,7 +47,8 @@ public class FileMonitorTest {
 	private void init(String targetDir) throws IOException {
 		// init
 		FileUtils.deleteQuietly(new File(targetDir));
-		FileUtils.writeStringToFile(new File(targetDir, "default.txt"), "test 試験 てすと テスト ﾃｽﾄ 테스트\n", "UTF-8");
+		FileUtils.writeStringToFile(new File(targetDir, "default.txt"),
+				"test 試験 てすと テスト ﾃｽﾄ 테스트\n", "UTF-8");
 	}
 
 	@Test
@@ -59,7 +60,8 @@ public class FileMonitorTest {
 	}
 
 	@Test
-	public void testFileMonitorSingleton() throws IOException, InterruptedException {
+	public void testFileMonitorSingleton() throws IOException,
+			InterruptedException {
 		String targetDir = "test";
 		init(targetDir);
 
@@ -73,31 +75,35 @@ public class FileMonitorTest {
 	}
 
 	@Test
-	public void testFileMonitorSingletonDefault() throws InterruptedException, IOException {
+	public void testFileMonitorSingletonDefault() throws InterruptedException,
+			IOException {
 		String targetDir = "test2";
 		init(targetDir);
 
 		// FileWatcherThread.DEFAULT_INTERVAL == 300000
 		FileMonitor.startSingleton(targetDir);
-		// ended right after starting without special file handling or sleep time
+		// ended right after starting without special file handling or sleep
+		// time
 		FileMonitor.stopSingleton();
 	}
 
 	@Test
-	public void testFileMonitorSingletonWithLog() throws InterruptedException, IOException {
+	public void testFileMonitorSingletonWithLog() throws InterruptedException,
+			IOException {
 		String targetDir = "test3";
 		init(targetDir);
 
-		// when directly returning logger - the logger name in the below console is shown as
+		// when directly returning logger - the logger name in the below console
+		// is shown as
 		// [org.anyframe.util.system.FileMonitorTest]
-		Log log = LogFactory.getLog(this.getClass());
-		FileMonitor.startSingleton(log, targetDir, 5000);
+		Logger logger = LoggerFactory.getLogger(this.getClass());
+		FileMonitor.startSingleton(logger, targetDir, 5000);
 
 		someFileProcessing(targetDir);
 
 		Thread.sleep(11 * 1000);
 
-		FileMonitor.stopSingleton(log);
+		FileMonitor.stopSingleton(logger);
 	}
 
 	private void someFileProcessing(final String targetDir) {
@@ -107,23 +113,30 @@ public class FileMonitorTest {
 					Thread.sleep(3 * 1000);
 
 					File defaultFile = new File(targetDir, "default2.txt");
-					FileUtils.copyFile(new File(targetDir, "default.txt"), defaultFile);
+					FileUtils.copyFile(new File(targetDir, "default.txt"),
+							defaultFile);
 
 					Thread.sleep(3 * 1000);
-					FileUtils.copyFile(defaultFile, new File(targetDir, "default3.txt"));
-					FileUtils.writeStringToFile(defaultFile, "changed content\n", "UTF-8");
+					FileUtils.copyFile(defaultFile, new File(targetDir,
+							"default3.txt"));
+					FileUtils.writeStringToFile(defaultFile,
+							"changed content\n", "UTF-8");
 
 					Thread.sleep(3 * 1000);
-					FileUtils.copyFile(defaultFile, new File(targetDir, "default4.txt"));
-					FileUtils.copyFile(defaultFile, new File(targetDir, "default5.txt"));
+					FileUtils.copyFile(defaultFile, new File(targetDir,
+							"default4.txt"));
+					FileUtils.copyFile(defaultFile, new File(targetDir,
+							"default5.txt"));
 
 					Thread.sleep(3 * 1000);
-					FileUtils.deleteQuietly(new File(targetDir, "default3.txt"));
-					FileUtils.deleteQuietly(new File(targetDir, "default5.txt"));
-					FileUtils.writeStringToFile(new File(targetDir, "default4.txt"), "another changed content\n",
+					FileUtils
+							.deleteQuietly(new File(targetDir, "default3.txt"));
+					FileUtils
+							.deleteQuietly(new File(targetDir, "default5.txt"));
+					FileUtils.writeStringToFile(new File(targetDir,
+							"default4.txt"), "another changed content\n",
 							"UTF-8");
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -131,17 +144,19 @@ public class FileMonitorTest {
 	}
 
 	@Test
-	public void testFileMonitorNewMonitoringThread() throws SigarException, IOException, InterruptedException {
+	public void testFileMonitorNewMonitoringThread() throws SigarException,
+			IOException, InterruptedException {
 		String targetDir = "test4";
 		init(targetDir);
 
-		Log log = LogFactory.getLog("fileMonitorLogger1");
-		FileWatcherThread fileWatcherThread = FileMonitor.start(log, targetDir, 5000);
+		Logger logger = LoggerFactory.getLogger("fileMonitorLogger1");
+		FileWatcherThread fileWatcherThread = FileMonitor.start(logger,
+				targetDir, 5000);
 
 		someFileProcessing(targetDir);
 
 		Thread.sleep(20 * 1000);
 
-		FileMonitor.stop(log, fileWatcherThread);
+		FileMonitor.stop(logger, fileWatcherThread);
 	}
 }

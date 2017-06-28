@@ -487,8 +487,8 @@
 			<listitem>
 				<para>
 					The example in actual use is as follows.
-					<programlisting language="java">Log log = LogFactory.getLog("fileMonitor");
-	FileWatcherThread fileWatcherThread = FileMonitor.start(log, targetDir, 5000);</programlisting>
+					<programlisting language="java">Logger logger = LoggerFactory.getLogger("fileMonitor");
+FileWatcherThread fileWatcherThread = FileMonitor.start(log, targetDir, 5000);</programlisting>
 				</para>
 			</listitem>
 			<listitem>
