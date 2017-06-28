@@ -4,12 +4,12 @@ anyframe.home=
 #=== Project Information ====
 project.name=anyframe-util-system-pi
 project.home=/Users/user/workspace/anyframe-util-system-pi
-project.version=1.0.2
+project.version=1.5.0
 project.type=web
 project.build=maven
 project.template.home=/Users/user/.anyframe/templates
 project.template=default
-project.daoframework=
+project.daoframework=springjdbc
 package.name=org.anyframe.plugin
 web.context.path=anyframe-util-system-pi
 

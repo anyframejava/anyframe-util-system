@@ -67,7 +67,7 @@ public class SystemInfoUtilTest {
 	@Test
 	public void testGetDiskProperty() {
 		if (DefaultScriptExecutor.getOs().is(OsType.Windows)) {
-			assertNotNull(SystemInfoUtil.getDiskProperty("c:/"));
+			assertNotNull(SystemInfoUtil.getDiskProperty("c:\\"));
 			System.out.println(ReflectionToStringBuilder.reflectionToString(SystemInfoUtil.getDiskProperty("c:\\"),
 					ToStringStyle.MULTI_LINE_STYLE));
 		}
@@ -108,9 +108,9 @@ public class SystemInfoUtilTest {
 	@Test
 	public void testGetMountedDiskCapacity() throws Exception {
 		if (DefaultScriptExecutor.getOs().is(OsType.Windows)) {
-			SystemInfoUtil.getMountedDiskCapacity("C:");
+			SystemInfoUtil.getMountedDiskCapacity("C:\\");
 			System.out.println(ReflectionToStringBuilder.reflectionToString(
-					SystemInfoUtil.getMountedDiskCapacity("C:"), ToStringStyle.MULTI_LINE_STYLE));
+					SystemInfoUtil.getMountedDiskCapacity("C:\\"), ToStringStyle.MULTI_LINE_STYLE));
 		}
 		else {
 			SystemInfoUtil.getMountedDiskCapacity("/");

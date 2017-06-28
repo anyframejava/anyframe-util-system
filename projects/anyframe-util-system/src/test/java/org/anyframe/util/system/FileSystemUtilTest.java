@@ -87,11 +87,11 @@ public class FileSystemUtilTest {
 				"testcase/destExtensionFalse/welcome_movie.png").lastModified());
 
 		/** copy the file whose date is more latest than last modified date */
-		FileSystemUtil.copyDirectory("testcase/srcDir", "testcase/destDate", DateUtil.string2Date("2011-01-13"), false);
+		FileSystemUtil.copyDirectory("testcase/srcDir", "testcase/destDate", DateUtil.stringToDate("2011-01-13"), false);
 		assertTrue(FileSystemUtil.existsFile("testcase/destDate/manual/foundation-4.6.1[1].pdf"));
 
 		/** copy the file whose date is more latest than last modified date & modify the file date to current time */
-		FileSystemUtil.copyDirectory("testcase/srcDir", "testcase/destDateFalse", DateUtil.string2Date("2011-01-13"),
+		FileSystemUtil.copyDirectory("testcase/srcDir", "testcase/destDateFalse", DateUtil.stringToDate("2011-01-13"),
 				false, false);
 		assertTrue(new File("testcase/srcDir/manual/foundation-4.6.1[1].pdf").lastModified() != new File(
 				"testcase/destDateFalse/manual/foundation-4.6.1[1].pdf").lastModified());
@@ -333,7 +333,7 @@ public class FileSystemUtilTest {
 	@Test
 	public void testExistsDir() {
 		assertTrue(FileSystemUtil.existsDir("testcase/srcDir"));
-		assertTrue(FileSystemUtil.existsDir("testcase/srcDir/manual", DateUtil.addDays(DateUtil.getCurrentDay(), -365 * 10),
-				DateUtil.getCurrentDay()));
+		assertTrue(FileSystemUtil.existsDir("testcase/srcDir/manual", DateUtil.addDays(DateUtil.getCurrentDate(), -365 * 10),
+				DateUtil.getCurrentDate()));
 	}
 }

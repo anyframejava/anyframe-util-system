@@ -67,7 +67,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 	/**
 	 * default FileMonitor Logger
 	 */
-	private static final Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(FileMonitor.class);
 
 	private static boolean running = false;
@@ -96,7 +96,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * @return true if the FileWatcherThread is started successfully, false if not
 	 */
 	public static boolean startSingleton(String targetDir, long interval) {
-		return startSingleton(logger, targetDir, interval);
+		return startSingleton(LOGGER, targetDir, interval);
 	}
 
 	/**
@@ -282,7 +282,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 											"NEW${}${Mtime: {}}{Size: {}}",
 											new Object[] {
 													file.getAbsolutePath(),
-													DateUtil.date2String(
+													DateUtil.dateToString(
 															new Date(
 																	file.lastModified()),
 															"MMM dd HH:mm"),
@@ -331,7 +331,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 * stop directory monitoring. use Singleton monitoring thread.
 	 */
 	public static void stopSingleton() {
-		stopSingleton(logger);
+		stopSingleton(LOGGER);
 	}
 
 	/**
@@ -344,7 +344,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 		FileWatcherThread watcherThread = FileWatcherThread.getInstance();
 		watcherThread.doStop();
 		setRunning(false);
-		logger.info("FileWatcherThread stopped.");
+		LOGGER.info("FileWatcherThread stopped.");
 	}
 
 	/**
@@ -382,7 +382,7 @@ public abstract class FileMonitor extends SystemUtilBase {
 	 */
 	public static void forceReviveSingletonFileWatcherThread() {
 		processIO(new IOCallback<Object>() {
-			public Object doInProcessIO() throws Exception {
+			public Object doInProcessIO() throws IllegalArgumentException, IllegalAccessException  {
 				Field field = ReflectionUtils.findField(
 						FileWatcherThread.class, "shouldDie");
 				ReflectionUtils.makeAccessible(field);

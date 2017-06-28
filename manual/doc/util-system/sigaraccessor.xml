@@ -8,7 +8,7 @@
 		Sigar Library Path 는 JVM 기동 옵션이나 플랫폼 별 library path 설정을 통해 특정 프로젝트에 맞게 변경 가능하다.
 		(Windows 인 경우 path 만 잡아도 가능, Linux/Solaris 인 경우 LD_LIBRARY_PATH, AIX 인 경우 LIBPATH 설정 등, java.library.path 시스템 변수에 직접 설정/append 하는 것도 가능)
 		Spring Container 기동 time 에 System.setProperty("java.library.path", 기존path + sigarLibPath) 형태로 재설정 하는 것도 가능하며
-		관련 샘플은 util-system-demo plugin의 UtilSystemController 의 @PostConstruct 로 지정한 initSigar() 메서드를 참조하라.
+		관련 샘플은 util-system plugin의 UtilSystemController 의 @PostConstruct 로 지정한 initSigar() 메서드를 참조하라.
 	</para>
 
 	<section id="utilsystem_sigaraccessor_sysinfo">
@@ -18,6 +18,7 @@
 			해당 정보를 이용하고자 하면 SysInfo 안에 있는 아래 명시된 VO 객체를 꺼내서 사용하면 된다.
 		</para>
 		<informaltable>
+		<caption>SysInfo 에 정의된 VO 객체</caption>
 		<tgroup cols="4">
 			<colspec colnum="1" colname="col1" colwidth="1*" />
 			<colspec colnum="2" colname="col2" colwidth="3*" />

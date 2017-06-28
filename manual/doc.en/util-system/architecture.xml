@@ -8,7 +8,7 @@
 		<para>The following diagram is Anyframe System Architecture for using Sigar.</para>
 		<mediaobject>
 	      <imageobject>
-	        <imagedata align="center" fileref="../image/util-system/util-system_architecture_sigar.jpg" />
+	        <imagedata align="center" fileref="../image/util-system/util-system-architecture-sigar.jpg" />
 	      </imageobject>
 	    </mediaobject>
     	<para>SIGAR (System Information Gatherer and Reporter) is an open source (Apache License, Version 2.0) library that supports various platforms/languages
@@ -66,7 +66,7 @@
 		<para>The following diagram is Anyframe system architecture for FileMonitor.</para>
 		<mediaobject>
 	      <imageobject>
-	        <imagedata align="center"  fileref="../image/util-system/util-system_architecture_filemonitor.jpg" />
+	        <imagedata align="center"  fileref="../image/util-system/util-system-architecture-filemonitor.jpg" />
 	      </imageobject>
 	    </mediaobject>
 	</section>
@@ -77,7 +77,7 @@
 		<para>The following diagram is Anyframe system architecture for file compression/decompression.</para>
 		<mediaobject>
 	      <imageobject>
-	        <imagedata align="center"  fileref="../image/util-system/util-system_architecture_zip.jpg" />
+	        <imagedata align="center"  fileref="../image/util-system/util-system-architecture-zip.jpg" />
 	      </imageobject>
 	    </mediaobject>
 	</section>
@@ -88,7 +88,7 @@
 		<para>The following diagram is Anyframe system architecture for implementing Shell Script.</para>
 		<mediaobject>
 	      <imageobject>
-	        <imagedata align="center"  fileref="../image/util-system/util-system_architecture_shellscript.jpg" />
+	        <imagedata align="center"  fileref="../image/util-system/util-system-architecture-shellscript.jpg" />
 	      </imageobject>
 	    </mediaobject>
 	</section>

@@ -5,6 +5,7 @@
 <!ENTITY utilsystem_architecture SYSTEM "util-system/architecture.xml">
 <!ENTITY utilsystem_sigaraccessor SYSTEM "util-system/sigaraccessor.xml">
 <!ENTITY utilsystem_util SYSTEM "util-system/util.xml">
+<!ENTITY utilsystem_usecase SYSTEM "util-system/usecase.xml">
 <!ENTITY utilsystem_resources SYSTEM "util-system/resources.xml">
 ]
 >
@@ -32,7 +33,7 @@
 			<year>2007-2012</year>
 			<holder>Samsung SDS</holder>
 		</copyright>
-		<releaseinfo>Version 1.0.2</releaseinfo>
+		<releaseinfo>Version 1.5.0</releaseinfo>
 
 		<productname>Anyframe Util System Plugin</productname>
 
@@ -58,13 +59,18 @@
 		<title> Introduction</title>
 		<partintro id="utilsystem_introduction_partintro">
 			<para>
-			    Util System Plugin provides utility type system convenience functions that can be utilized in common.
-			    This plugin supports execution in the utility type within the application by wrapping open source functions 
-			    to easily get information on System, Network, FileSystem using open source Sigar that provides information such as each OS system, file system, process as standardized API,   
-			    and provides a structure to gather and access various system resource information through a single route of SigarAccessor.
+				Util System Plugin is composed of sample codes to guide basic usage of util-system service and reference libraries necessary to use them.
+			    Sample Application is provided in the web application which system resources can be checked can be seen at a look in the DashBoard type 
+			    using the simpleweb-jquery plugin (jQuery UI Portlet) and the FusionChart Free service of the Chart plugin.
 			</para>
 			<para>
-			    Util System Plugin also provides the java compression/decompression function that uses the functions of open source Commons Compress and JDK through ZipUtil.
+			
+				To easily get information on System, Network, FileSystem, util-system service supports execution in the utility type by wrapping open source Sigar(provides information such as each OS system, file system, process as standardized API) 	
+				And provides a structure to gather and access various system resource information through a single route of SigarAccessor.	
+			</para>					
+			<para>
+			    Util-system service also provides the java compression/decompression function that uses the functions of open source Commons Compress 
+			    and JDK through ZipUtil.
 			</para>
 			<para>
 			 	System function processing through execution of Shell Script is also possible. When Sigar is not used, the procedures are usually required that extract wanted information by executing Shell Script (or simple system commands) for each OS through the exec method of Rutime and parsing the result 
@@ -78,8 +84,14 @@
 			<para>
 				The installation result can be checked by the installed (mvn anyframe:installed) or the jetty:run (mvn clean jetty:run) commands.
 			</para>
-			<para role="introduction_title"><emphasis role="bold">Dependent Plugins</emphasis></para>
+			<para>
+				Util System Plugin gathers the initial system information through Sigar when the server is initialized, 
+				and it should be noted that when there is no permission on the process being executed in the system 
+				(e.g. system process of linux) or when a PC-based security tool blocks checking process information (e.g. Incops), 
+				there is no problem in initialization and execution even though Sigar produces a warning message through a standard error output saying that access to the process is not allowed.
+			</para>			
 			<informaltable>
+				<caption>Dependent Plugins</caption>
 				<tgroup cols="2">
 					<colspec colnum="1" colname="col1" colwidth="5*" />
 					<colspec colnum="2" colname="col2" colwidth="5*" />
@@ -90,9 +102,15 @@
 						</row>
 					</thead>
 					<tbody>
+						<!--  
 						<row>
-							<entry align="center"><ulink url="http://dev.anyframejava.org/docs.en/anyframe/plugin/essential/core/1.0.4/reference/htmlsingle/core.html">core</ulink></entry>
-							<entry align="center" valign="middle">2.0.0 > *</entry>
+							<entry align="center"><ulink url="http://dev.anyframejava.org/docs.en/anyframe/plugin/optional/simpleweb-jquery/1.0.4-SNAPSHOT/reference/htmlsingle/simpleweb-jquery.html">simpleweb-jquery</ulink></entry>
+							<entry align="center" valign="middle">2.0.0 > * > 1.0.3</entry>
+						</row>
+						-->
+						<row>
+							<entry align="center"><ulink url="http://dev.anyframejava.org/docs.en/anyframe/plugin/optional/chart/1.0.3/reference/htmlsingle/chart.html">chart</ulink></entry>
+							<entry align="center" valign="middle">2.0.0 > * > 1.0.2</entry>
 						</row>
 					</tbody>
 				</tgroup>
@@ -145,6 +163,7 @@
 		&utilsystem_architecture;
 		&utilsystem_sigaraccessor;
 		&utilsystem_util;
+		&utilsystem_usecase;
 		&utilsystem_resources;
 	</part>
 </book>

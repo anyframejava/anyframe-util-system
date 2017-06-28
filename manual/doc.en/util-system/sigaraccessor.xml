@@ -8,7 +8,7 @@
 		Sigar Library Path can be changed for a specific project through JVM starting option or library path setup for each platform.
 		(The java.library.path system parameters can be directly set or appended with path setup in Windows, LD_LIBRARY_PATH setup in Linux/Solaris, and LIBPATH setup in AIX.)
 		It can be reset in the System.setProperty ("java.library.path", existing path + sigarLibPath) type when Spring Container is initialized, 
-		and refer to initSigar() method set as @PostConstruct in UtilSystemController of util-system-demo plugin for related samples.
+		and refer to initSigar() method set as @PostConstruct in UtilSystemController of util-system plugin for related samples.
 	</para>
 
 	<section id="utilsystem_sigaraccessor_sysinfo">
