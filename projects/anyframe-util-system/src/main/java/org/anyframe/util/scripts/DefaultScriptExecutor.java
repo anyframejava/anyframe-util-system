@@ -27,29 +27,24 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.anyframe.exception.BaseRuntimeException;
 import org.anyframe.util.system.ScriptPropertiesLoader;
 import org.anyframe.util.system.SystemInfoUtil.MemRegion;
 import org.anyframe.util.system.SystemUtilBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * default implementation of ScriptExecutor which defines the function to be
  * executed by Shell Script. default implementation was written by Unix command
  * execution.
  *
- * @author ByungHun Woo 
+ * @author ByungHun Woo
  *
  */
 public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecutor {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultScriptExecutor.class);
 
-	private static final DefaultScriptExecutor INSTANCE = new DefaultScriptExecutor();
+	private static final DefaultScriptExecutor instance = new DefaultScriptExecutor();
 
 	public static ScriptExecutor getInstance() {
-		return INSTANCE;
+		return instance;
 	}
 
 	private static OsType os;
@@ -131,13 +126,13 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 
 		}
 		catch (IOException e) {
-			throw new BaseRuntimeException("processShell IOException occured : " + e.getMessage(), e);
+			throw new RuntimeException("processShell IOException occured : " + e.getMessage(), e);
 		}
 		catch (RuntimeException re) {
 			throw re;
 		}
 		catch (Exception e) {
-			throw new BaseRuntimeException("processShell IOException occured : " + e.getMessage(), e);
+			throw new RuntimeException("processShell Exception occured : " + e.getMessage(), e);
 		}
 		finally {
 			if (inputStream != null)
@@ -145,14 +140,14 @@ public class DefaultScriptExecutor extends SystemUtilBase implements ScriptExecu
 					inputStream.close();
 				}
 				catch (IOException e) {
-					LOGGER.error("processShell Exception occured : " + e.getMessage(), e);
+					e.printStackTrace();
 				}
 			if (br != null)
 				try {
 					br.close();
 				}
 				catch (IOException e) {
-					LOGGER.error("processShell Exception occured : " + e.getMessage(), e);
+					e.printStackTrace();
 				}
 			if (out != null) {
 				out.close();
